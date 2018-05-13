@@ -24,7 +24,9 @@ public class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     @IBOutlet var recordButton: UIButton!
     // MARK: UIViewController
+    @IBOutlet var textScore: UILabel!
     
+    @IBOutlet var colorScore: UILabel!
     public override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -86,12 +88,35 @@ public class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         // A recognition task represents a speech recognition session.
         // We keep a reference to the task so that it can be cancelled.
+        let start = NSDate()
+        print("BBB")
+        print(start)
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest!) { result, error in
             var isFinal = false
             
             if let result = result {
                 self.textView.text = result.bestTranscription.formattedString
                 isFinal = result.isFinal
+                print(self.textView.text)
+                print("CCCC")
+                let end = NSDate()
+                print(end)
+                let timeInterval: Double = end.timeIntervalSince(start as Date)
+                print(timeInterval)
+                let components = self.textView.text.components(separatedBy: .whitespacesAndNewlines)
+                let words = components.filter { !$0.isEmpty }
+                let speed = Double(words.count) / (timeInterval/60.0)
+
+                self.textScore.text = String(describing: Int(speed)) + " wpm"
+                if speed > 120 {
+                    self.colorScore.backgroundColor = .red
+                }
+                else if speed < 80 {
+                    self.colorScore.backgroundColor = .red
+                }
+                else {
+                    self.colorScore.backgroundColor = .green
+                }
             }
             
             if error != nil || isFinal {
@@ -104,6 +129,9 @@ public class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 self.recordButton.isEnabled = true
                 self.recordButton.setTitle("Start Recording", for: [])
             }
+            
+
+ 
         }
         
         let recordingFormat = inputNode.outputFormat(forBus: 0)
